@@ -1,5 +1,5 @@
 import PySimpleGUI as sg
-from PathHandler import combine_path_with_root
+from PathHandler import combine_path_with_project_root
 from PathHandler import SRC_PT_HEADERS_FOLDER
 
 TAB = '       ' 
@@ -20,24 +20,28 @@ class Layout:
     KEY_SWITCHT_IMAGES_LABEL = '-switch_images_label-'
     KEY_SELECT_FOLDER_BOX = '-select_folder_box-'
 
-    DEFAULT_PRECISION_VALUE = 0.5
-    WINDOW_SIZE = (800, 600)
-
+    DEFAULT_PRECISION_VALUE = 0.2
+    WINDOW_SIZE = (800, 700)
+    
     SELECT_IMAGES_FILTER = (("JPEG (*.jpg)", "*.jpg"), ("PNG (*.png)", "*.png"), ("BMP (*.bmp)", "*.bmp"), ("All files (*.*)", "*.*"))
     SELECT_PT_FILTER = (("Pytorch model (*.pt)", "*.pt"), ("All files (*.*)", "*.*"))
+
+    __IMAGE_FRAME_SIZE = (525, 400)
+    __MENU_FRAME_SIZE = (WINDOW_SIZE[0] - __IMAGE_FRAME_SIZE[0], __IMAGE_FRAME_SIZE[1])
 
     __MAX_STATUS_CHARS = 2147483647          # INT32 max value  
     __MAX_MENU_TEXT_LENGTH_MAGIC_NUMBER = 31 # TODO: find a better way to calculate this
 
     def __init__(self, _theme='Dark') -> None:
         self.status_length = 0 
-        self.initial_pt_headers_path = combine_path_with_root(SRC_PT_HEADERS_FOLDER)
+        self.initial_pt_headers_path = combine_path_with_project_root(SRC_PT_HEADERS_FOLDER)
         
         sg.theme(_theme)
         self.sg_layout = self.__create_layout()
         
     
-    def __create_layout(self):
+    def __create_layout(self)->list['list[sg.Element]']:
+        """Creates PySimpleGUI layout representation for application"""
         left_frame_content = [
             [sg.Image(source='', filename='No image selected', key=self.KEY_IMAGE, expand_x=True, expand_y=True)]]
         right_frame_content = [
@@ -51,7 +55,7 @@ class Layout:
             [sg.HorizontalSeparator(pad=((0,0),(5, 0)))],
             [sg.VStretch()],
             [sg.Slider(range=(0, 1), orientation='h', resolution=.1, default_value=self.DEFAULT_PRECISION_VALUE, size=(15, 15), key=self.KEY_PRECISSION_SLIDER)],
-            [sg.Text('Set model precission', pad=((0,0),(0, 10)))],
+            [sg.Text('Set detection precission', pad=((0,0),(0, 10)))],
             [sg.Button('Detect car parts', key=self.KEY_DETECT_BTN, size=(20,1), enable_events=True, visible=True, disabled=True)],
             [sg.VStretch()],
             [sg.HorizontalSeparator(pad=((0,0),(0, 5)))],
@@ -60,8 +64,8 @@ class Layout:
         ]
         bottom_frame_content = [[sg.Multiline(f'>>> Welcome to car parts detection{NTAB}Select model and images to start.', key=self.KEY_TXT_STATUS, size=(40, 2), autoscroll=True, no_scrollbar=False, expand_x=True, expand_y=True, disabled=True)]]
         
-        left_frame = sg.Frame('Image', left_frame_content,size=(525,400), element_justification='center', expand_x=True, expand_y=True, relief=sg.RELIEF_SUNKEN)
-        right_frame = sg.Frame('Menu', right_frame_content, element_justification='center', expand_x=True, expand_y=True, relief=sg.RELIEF_SUNKEN)
+        left_frame = sg.Frame('Image', left_frame_content,size=self.__IMAGE_FRAME_SIZE, element_justification='center', expand_x=True, expand_y=True, relief=sg.RELIEF_SUNKEN)
+        right_frame = sg.Frame('Menu', right_frame_content,size=self.__MENU_FRAME_SIZE, element_justification='center', expand_x=True, expand_y=True, relief=sg.RELIEF_SUNKEN)
         bottom_frame = sg.Frame('Status', bottom_frame_content, element_justification='left', expand_x=True, expand_y=True, relief=sg.RELIEF_SUNKEN)
 
         return  [ [left_frame, right_frame],
@@ -83,6 +87,7 @@ class Layout:
     #----------------------------------------------------------------------------------------------------------
 
     def update_status(self, window:sg.Window, msg:str)->None:
+        """Updates status text box with new message. If message is too long, status text box is cleared."""
         self.status_length += 1
         if self.status_length > self.__MAX_STATUS_CHARS: # clear status if it's too long
             window[self.KEY_TXT_STATUS].update(">>> Cleared status due to it's length.")
@@ -90,9 +95,12 @@ class Layout:
         window[self.KEY_TXT_STATUS].update('\n'+msg, append=True)
 
     def set_visibility(self, window:sg.Window, key:str, _visible:bool)->None:
+        """Sets visibility of element with given key"""
         window[key].update(visible=_visible)
 
     def set_enabled(self, window:sg.Window, key:str, _enabled:bool)->None:
+        """Sets enabled state of element with given key. Special case for KEY_SWITCHT_IMAGES_LABEL 
+            - it's text color is changed: disabled - grey, enabled - default"""
         if(key==self.KEY_SWITCHT_IMAGES_LABEL): # special case for this label
             if (_enabled):  window[key].update(text_color=sg.theme_text_color())
             else:           window[key].update(text_color='grey') 
@@ -100,21 +108,23 @@ class Layout:
             window[key].update(disabled=(not _enabled))
 
     def update_image_path(self, window: sg.Window, imgpath:str)->None:
+        """Sets image path for image field and updates image field with new image."""
         window[self.KEY_IMAGE].update(source=imgpath)
 
     def update_image_data(self, window: sg.Window, imgdata)->None:
+        """ Sets image data for image field and updates image field with new image."""
         window[self.KEY_IMAGE].update(data=imgdata)
 
     def update_label(self, window:sg.Window, key:str, value:str)->None:
+        """Updates label with given key. If key is KEY_SELECTED_PT_LABEL, path is trimmed to fit into Menu frame."""
         if(key==self.KEY_SELECTED_PT_LABEL):
             value = self.__trim_path_begining(value)
         window[key].update(value)
 
     def get_image_field_size(self, window:sg.Window)->tuple:
+        """Returns size of image field."""
         return window[self.KEY_IMAGE].get_size()
-
-    def get_key(self, key):
-        return self.sg_layout[key].get()
     
-    def get_sg_layout(self):
+    def get_sg_layout(self)->list['list[sg.Element]']:
+        """Returns created PysimpleGUI layout."""
         return self.sg_layout

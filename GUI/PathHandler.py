@@ -1,38 +1,46 @@
-import os, glob
+import glob
+from os.path import isdir, isfile, join, normpath, basename, dirname, abspath, getmtime
 from tkinter.filedialog import askdirectory, askopenfilenames, askopenfilename
 
 # Defines
 PRETRAIN_HEADERS_EXTENTION  = '.pt'
 PRETRAIN_HEADERS_PREFIX     = 'exp'
 
-SRC_PT_HEADERS_FOLDER   = 'yolov7/runs/train/'
-SRC_IMAGES_FOLDER       = 'yolov7/YOLO-image-recognition-1/test/images/'
-SRC_DETECT_SCRIPT       = 'yolov7/detect.py'
-RES_IMAGES_FOLDER       = 'yolov7/runs/detect/'
+SRC_PT_HEADERS_FOLDER   = 'yolov7/runs/train/'                              # Default to folder with pretrain headers
+SRC_IMAGES_FOLDER       = 'yolov7/YOLO-image-recognition-1/test/images/'    # Default to folder with images to detect
+RES_IMAGES_FOLDER       = 'runs/detect/'
+
+def get_file_abspath(__file:str) -> str:
+    return abspath(__file)
+
+def get_gui_root() -> str:
+    return dirname(get_file_abspath(__file__))
 
 def get_project_root() -> str:
-    return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return dirname(get_gui_root())
 
-def combine_path_with_root(path:str) -> str:
-    return os.path.join(get_project_root(), path)
+def combine_path_with_gui_root(path:str) -> str:
+    return normpath(join(get_gui_root(), path))
+
+def combine_path_with_project_root(path:str) -> str:
+    return normpath(join(get_project_root(), path))
 
 def get_folder_name_from_path(path:str) -> str:
-    path = os.path.normpath(path)
-    return os.path.basename(os.path.dirname(path))
+    return basename(dirname(normpath(path)))
 
 def get_file_name(path:str) -> str: 
-    return os.path.basename(os.path.normpath(path))
+    return basename(normpath(path))
 
 def get_list_of_files_in_dir(directory:str, extention:str='') -> list:
-    if not os.path.isdir(directory): raise Exception(f'Directory {directory} does not exist')
+    if not isdir(directory): raise Exception(f'Directory {directory} does not exist')
     if extention != '' and extention[0] != '.': extention = '.' + extention
     return glob.glob(directory + '/*' + extention)
 
 def is_directory(path:str) -> bool:
-    return os.path.isdir(path)
+    return isdir(path)
 
 def is_file(path:str) -> bool:
-    return os.path.isfile(path)
+    return isfile(path)
 
 def get_path_from_user(title:str, file_types:tuple=None, initial_folder:str=None, multiple_files=False) -> list:
     """ :return: path to file(s) or folder(s) selected by user. :param: file_types - leave empty to select folders """
@@ -44,8 +52,6 @@ def get_path_from_user(title:str, file_types:tuple=None, initial_folder:str=None
 
 # Returns newest folder in directory with prefix
 def get_newest_folder_in_dir(directory:str, prefix:str=PRETRAIN_HEADERS_PREFIX) -> str:    
-    if not os.path.isdir(directory):
+    if not isdir(directory):
         raise Exception(f'Directory {directory} does not exist')
-    folders = glob.glob(directory + '/*/')    
-    folders = [f for f in folders if prefix in f]
-    return max(folders, key=os.path.getctime)
+    return max(glob.glob(directory+f'/{prefix}*'), key=getmtime)

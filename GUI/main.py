@@ -11,7 +11,6 @@ except ImportError as ie:
     input(f'Import error: {ie}\nPress any key to exit...')
     exit(1)
 
-
 def main():
     print('\nStarting GUI...')
     layout = Layout()
@@ -20,7 +19,6 @@ def main():
     print('Goodbye!')
 
 if __name__ == '__main__':
-    try:
-        main()
+    try: main()
     except Exception as e:
         print(f'Programm will close due to exception: {e}')
