@@ -1,3 +1,4 @@
+import pathlib
 import time
 from pathlib import Path
 from Layout import NTAB
@@ -36,7 +37,10 @@ class DetectionHandler:
 
         # Directories
         print('Creating directories...')
-        save_dir = Path(increment_path(Path(project) / name, exist_ok=exist_ok))  # increment run
+        ##MODIFIED MODEL PARENTDIR (CICHON)
+        parentdir = str(pathlib.Path(__file__).parent.absolute())
+        save_dir = Path(increment_path(parentdir + '/runs/detect/' + name, exist_ok=exist_ok))  # increment run
+        save_dir = Path(parentdir + '/runs/detect/' + name)
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
         print('Initializing model...')
