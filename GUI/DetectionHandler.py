@@ -21,7 +21,7 @@ class DetectionHandler:
         pass
 
     # print - selected logging function or print function
-    def detect(self, print: object, source: str, weights: str, save_txt=False, img_size=640, view_img=False, save_conf=False, conf_thres=0.25, iou_thres=0.45, nosave=False, classes=None, agnostic_nms=False, augment=False, update=False, project='runs/detect', name='exp', exist_ok=False, trace=True, img=None, device=''):
+    def detect(self, print: object, source: str, weights: str, conf_thres=0.3, save_txt=False, img_size=640, view_img=False, save_conf=False, iou_thres=0.45, nosave=False, classes=None, agnostic_nms=False, augment=False, update=False, project='runs/detect', name='exp', exist_ok=False, trace=True, img=None, device=''):
         with torch.no_grad():
             if update:  # update all models (to fix SourceChangeWarning)
                 for weights in ['yolov7.pt']:
@@ -37,10 +37,10 @@ class DetectionHandler:
 
         # Directories
         print('Creating directories...')
-        save_dir = Path(increment_path(Path(project) / name, exist_ok=exist_ok))  # increment run
+        #save_dir = Path(increment_path(Path(project) / name, exist_ok=exist_ok))  # increment run
         ##MODIFIED MODEL PARENTDIR (CICHON)
-        #parentdir = str(pathlib.Path(__file__).parent.absolute())
-        #save_dir = Path(increment_path(parentdir + '/runs/detect/' + name, exist_ok=exist_ok))  # increment run
+        parentdir = str(pathlib.Path(__file__).parent.absolute())
+        save_dir = Path(increment_path(parentdir + '/runs/detect/' + name, exist_ok=exist_ok))  # increment run
         #save_dir = Path(parentdir + '/runs/detect/' + name)
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
@@ -119,7 +119,7 @@ class DetectionHandler:
 
             #print('Postprocessing...')
             # Apply NMS
-            pred = non_max_suppression(pred, conf_thres, iou_thres, classes=classes, agnostic=agnostic_nms)
+            pred = non_max_suppression(pred, conf_thres=conf_thres, iou_thres=iou_thres, classes=classes, agnostic=agnostic_nms)
             t3 = time_synchronized()
 
             #print('Appling classifiers...')
