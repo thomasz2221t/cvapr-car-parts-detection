@@ -37,10 +37,11 @@ class DetectionHandler:
 
         # Directories
         print('Creating directories...')
+        save_dir = Path(increment_path(Path(project) / name, exist_ok=exist_ok))  # increment run
         ##MODIFIED MODEL PARENTDIR (CICHON)
-        parentdir = str(pathlib.Path(__file__).parent.absolute())
-        save_dir = Path(increment_path(parentdir + '/runs/detect/' + name, exist_ok=exist_ok))  # increment run
-        save_dir = Path(parentdir + '/runs/detect/' + name)
+        #parentdir = str(pathlib.Path(__file__).parent.absolute())
+        #save_dir = Path(increment_path(parentdir + '/runs/detect/' + name, exist_ok=exist_ok))  # increment run
+        #save_dir = Path(parentdir + '/runs/detect/' + name)
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
         print('Initializing model...')
@@ -172,7 +173,7 @@ class DetectionHandler:
                 if save_img:
                     if dataset.mode == 'image':
                         cv2.imwrite(save_path, im0)
-                        #print(f" The image with the result is saved in: {save_path}")
+                        #print(f" The images with the result is saved in: {save_path}")
                     else:  # 'video' or 'stream'
                         if vid_path != save_path:  # new video
                             vid_path = save_path

@@ -127,7 +127,8 @@ class EventHandler:
             self.__log_status(f'[Error] Exception occured while running detection:{NTAB}{e}')    
             return
 
-        try: self.output_images = get_list_of_files_in_dir( get_newest_folder_in_dir(resultfolder) )
+        result_path = get_newest_folder_in_dir(resultfolder)
+        try: self.output_images = get_list_of_files_in_dir(result_path)
         except Exception as e: self.__log_status(f'[Error] Cannot access files in given result folder:{NTAB}{e}')
         
         if len(self.output_images) == 0:
@@ -136,6 +137,7 @@ class EventHandler:
             self.flag_images_detected = True
             if self.current_img_index == -1: self.current_img_index = 0
             self.__handle_img_switch(self.current_img_index)
+        self.__log_status(f'Result images fetched from {result_path} folder.')
 
 
     def __handle_img_switch(self, index:int):

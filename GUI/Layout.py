@@ -54,7 +54,7 @@ class Layout:
             [sg.Stretch(), sg.Checkbox('Select Folder', key=self.KEY_SELECT_FOLDER_BOX, enable_events=True, pad=((0,3),(10, 0)))],
             [sg.HorizontalSeparator(pad=((0,0),(5, 0)))],
             [sg.VStretch()],
-            [sg.Slider(range=(0, 1), orientation='h', resolution=.1, default_value=self.DEFAULT_PRECISION_VALUE, size=(15, 15), key=self.KEY_PRECISSION_SLIDER)],
+            [sg.Slider(range=(0, 1), orientation='h', resolution=.1, default_value=self.DEFAULT_PRECISION_VALUE, size=(15, 15), key=self.KEY_PRECISSION_SLIDER, enable_events=True)],
             [sg.Text('Set detection precission', pad=((0,0),(0, 10)))],
             [sg.Button('Detect car parts', key=self.KEY_DETECT_BTN, size=(20,1), enable_events=True, visible=True, disabled=True)],
             [sg.VStretch()],
